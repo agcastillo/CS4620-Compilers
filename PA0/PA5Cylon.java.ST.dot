@@ -1,0 +1,29 @@
+digraph SymTable {
+	graph [rankdir="LR"];
+	node [shape=record];
+	0 [label=" <f0> Scope | <f1> mDict\[CylonPA5\] "];
+	0:<f1> -> 1:<f0>;
+	1 [label=" <f0> ClassSTE | <f1> mName = CylonPA5| <f2> mMain = false| <f3> mSuperClass = null| <f4> mScope "];
+	1:<f4> -> 2:<f0>;
+	2 [label=" <f0> Scope | <f1> mDict\[run\] | <f2> mDict\[cylonRow\] "];
+	2:<f1> -> 3:<f0>;
+	3 [label=" <f0> MethodSTE | <f1> mName = run| <f2> mSignature = () returns class_null;| <f3> mScope "];
+	3:<f3> -> 4:<f0>;
+	4 [label=" <f0> Scope | <f1> mDict\[this\] | <f2> mDict\[currentRow\] "];
+	4:<f1> -> 5:<f0>;
+	5 [label=" <f0> VarSTE | <f1> mName = this| <f2> mType = class_CylonPA5;| <f3> mBase = Y| <f4> mOffset = 1"];
+	4:<f2> -> 6:<f0>;
+	6 [label=" <f0> VarSTE | <f1> mName = currentRow| <f2> mType = BYTE| <f3> mBase = Y| <f4> mOffset = 3"];
+	2:<f2> -> 7:<f0>;
+	7 [label=" <f0> MethodSTE | <f1> mName = cylonRow| <f2> mSignature = (BYTE, BYTE) returns class_null;| <f3> mScope "];
+	7:<f3> -> 8:<f0>;
+	8 [label=" <f0> Scope | <f1> mDict\[this\] | <f2> mDict\[col\] | <f3> mDict\[row\] | <f4> mDict\[i\] "];
+	8:<f1> -> 9:<f0>;
+	9 [label=" <f0> VarSTE | <f1> mName = this| <f2> mType = class_CylonPA5;| <f3> mBase = Y| <f4> mOffset = 1"];
+	8:<f2> -> 10:<f0>;
+	10 [label=" <f0> VarSTE | <f1> mName = col| <f2> mType = BYTE| <f3> mBase = Y| <f4> mOffset = 3"];
+	8:<f3> -> 11:<f0>;
+	11 [label=" <f0> VarSTE | <f1> mName = row| <f2> mType = BYTE| <f3> mBase = Y| <f4> mOffset = 4"];
+	8:<f4> -> 12:<f0>;
+	12 [label=" <f0> VarSTE | <f1> mName = i| <f2> mType = BYTE| <f3> mBase = Y| <f4> mOffset = 5"];
+}
