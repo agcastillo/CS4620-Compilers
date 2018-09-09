@@ -1,0 +1,29 @@
+digraph SymTable {
+	graph [rankdir="LR"];
+	node [shape=record];
+	0 [label=" <f0> Scope | <f1> mDict\[SquareCreator\] "];
+	0:<f1> -> 1:<f0>;
+	1 [label=" <f0> ClassSTE | <f1> mName = SquareCreator| <f2> mMain = false| <f3> mSuperClass = null| <f4> mScope "];
+	1:<f4> -> 2:<f0>;
+	2 [label=" <f0> Scope | <f1> mDict\[currX\] | <f2> mDict\[currY\] | <f3> mDict\[CreateSquare\] | <f4> mDict\[clearSquare\] "];
+	2:<f1> -> 3:<f0>;
+	3 [label=" <f0> VarSTE | <f1> mName = currX| <f2> mType = INT| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	2:<f2> -> 4:<f0>;
+	4 [label=" <f0> VarSTE | <f1> mName = currY| <f2> mType = INT| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	2:<f3> -> 5:<f0>;
+	5 [label=" <f0> MethodSTE | <f1> mName = CreateSquare| <f2> mSignature = (INT) returns class_null;| <f3> mScope "];
+	5:<f3> -> 6:<f0>;
+	6 [label=" <f0> Scope | <f1> mDict\[this\] | <f2> mDict\[len\] "];
+	6:<f1> -> 7:<f0>;
+	7 [label=" <f0> VarSTE | <f1> mName = this| <f2> mType = class_SquareCreator;| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	6:<f2> -> 8:<f0>;
+	8 [label=" <f0> VarSTE | <f1> mName = len| <f2> mType = INT| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	2:<f4> -> 9:<f0>;
+	9 [label=" <f0> MethodSTE | <f1> mName = clearSquare| <f2> mSignature = (INT) returns class_null;| <f3> mScope "];
+	9:<f3> -> 10:<f0>;
+	10 [label=" <f0> Scope | <f1> mDict\[this\] | <f2> mDict\[len\] "];
+	10:<f1> -> 11:<f0>;
+	11 [label=" <f0> VarSTE | <f1> mName = this| <f2> mType = class_SquareCreator;| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	10:<f2> -> 12:<f0>;
+	12 [label=" <f0> VarSTE | <f1> mName = len| <f2> mType = INT| <f3> mBase = INVALID| <f4> mOffset = 0"];
+}

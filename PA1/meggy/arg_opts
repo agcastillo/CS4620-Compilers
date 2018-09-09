@@ -1,9 +1,12 @@
 300
 true
-A
+Right
 delay
-B
+Right
 delay
-A
+Left
 delay
-B
+Left
+delay 
+Right
+delay
