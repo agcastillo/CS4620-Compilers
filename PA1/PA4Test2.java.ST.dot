@@ -1,0 +1,17 @@
+digraph SymTable {
+	graph [rankdir="LR"];
+	node [shape=record];
+	0 [label=" <f0> Scope | <f1> mDict\[Stripes\] "];
+	0:<f1> -> 1:<f0>;
+	1 [label=" <f0> ClassSTE | <f1> mName = Stripes| <f2> mMain = false| <f3> mSuperClass = null| <f4> mScope "];
+	1:<f4> -> 2:<f0>;
+	2 [label=" <f0> Scope | <f1> mDict\[SetStripe\] "];
+	2:<f1> -> 3:<f0>;
+	3 [label=" <f0> MethodSTE | <f1> mName = SetStripe| <f2> mSignature = (BYTE) returns class_null;| <f3> mScope "];
+	3:<f3> -> 4:<f0>;
+	4 [label=" <f0> Scope | <f1> mDict\[this\] | <f2> mDict\[x\] "];
+	4:<f1> -> 5:<f0>;
+	5 [label=" <f0> VarSTE | <f1> mName = this| <f2> mType = class_Stripes;| <f3> mBase = INVALID| <f4> mOffset = 0"];
+	4:<f2> -> 6:<f0>;
+	6 [label=" <f0> VarSTE | <f1> mName = x| <f2> mType = BYTE| <f3> mBase = INVALID| <f4> mOffset = 0"];
+}
