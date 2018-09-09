@@ -26,9 +26,11 @@ class Game{
         while (true){
             if (Meggy.checkButton(Meggy.Button.Left)){
                 thePaddle.moveLeft();
+                Meggy.toneStart(Meggy.Tone.Cs3,50);
             }
             if (Meggy.checkButton(Meggy.Button.Right)){
                 thePaddle.moveRight();
+                Meggy.toneStart(Meggy.Tone.Cs3,50);
             }
 
             if (theBall.getCurrX() == 1){ // Ball has to move back up
