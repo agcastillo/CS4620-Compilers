@@ -1,0 +1,255 @@
+package mjparser;
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.PrintWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+
+import ast.node.*;
+
+parser code {:
+
+    public PrintWriter out; 
+    
+    public String programName;
+
+    public void unrecovered_syntax_error(Symbol cur_SymbolValue) {
+        //System.out.println("cur_SymbolValue: "+ cur_SymbolValue.value);
+		report_fatal_error("Fatal syntax error", cur_SymbolValue);
+    }
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        done_parsing();
+        Symbol sym = (Symbol)info;
+        mjparser.SymbolValue tok = (mjparser.SymbolValue)sym.value;
+        throw new mjparser.ParseException("Fatal parsing error", 
+                                          tok.line, tok.pos);
+    }
+    
+    public void report_error(String message, Object info) {
+        Symbol sym = (Symbol)info;
+        mjparser.SymbolValue tok = (mjparser.SymbolValue)sym.value;
+		//System.out.println("sym null? "+(sym == null)+"; sym.sym: "+sym.sym);
+		//System.err.println("tok null? "+ (tok == null)+"; tok.lexeme: "+ tok.lexeme);
+        System.err.println("[" + tok.line + "," + tok.pos + "] "); 
+                              System.err.println( message + " at " + tok.toString() );
+    }
+            
+:}
+
+/* Notice: all terminals declared here */
+terminal SymbolValue PLUS, MINUS, TIMES, LPAREN, RPAREN;
+terminal SymbolValue LBRACE, RBRACE;
+terminal SymbolValue BOOLEAN, INT;
+terminal SymbolValue BYTE;
+terminal SymbolValue MAIN, IMPORT;
+terminal SymbolValue IF, ELSE;
+terminal SymbolValue LT;
+terminal SymbolValue EQUAL;
+terminal SymbolValue AND, NOT;
+terminal SymbolValue WHILE;
+terminal SymbolValue COMMA, DOT;
+terminal SymbolValue NEW, PUBLIC, RETURN, STATIC;
+terminal SymbolValue STRING, VOID;
+terminal SymbolValue CLASS, EXTENDS;
+terminal SymbolValue LBRACKET, RBRACKET;
+terminal SymbolValue LENGTH;
+terminal SymbolValue SEMI;
+terminal SymbolValue ASSIGN;
+
+terminal SymbolValue MEGGY;
+terminal SymbolValue MEGGYCOLOR;
+terminal SymbolValue MEGGYBUTTON;
+terminal SymbolValue MEGGYTONE;
+terminal SymbolValue MEGGYSETPIXEL;
+terminal SymbolValue MEGGYSETAUXLEDS;
+terminal SymbolValue MEGGYTONESTART;
+terminal SymbolValue MEGGYDELAY;
+terminal SymbolValue MEGGYGETPIXEL;
+terminal SymbolValue MEGGYCHECKBUTTON;
+
+terminal SymbolValue INT_LITERAL, ID;
+terminal SymbolValue TRUE, FALSE;
+terminal SymbolValue COLOR_LITERAL, BUTTON_LITERAL, TONE_LITERAL;
+terminal SymbolValue THIS;
+terminal SymbolValue COMMENT;
+
+/* bogus terminal for unary precedence declaration */
+terminal UMINUS;
+
+non terminal Program program;
+non terminal IExp exp, lexp;
+non terminal List<IStatement> statement_list;
+non terminal IStatement statement;
+non terminal List<IStatement> block_list;
+non terminal MainClass main_class;
+
+/* Declare precedence and associativity  here */
+precedence left TIMES, PLUS, MINUS, AND, EQUAL, ELSE;
+precedence right UMINUS;
+
+
+/* Meggy Java Grammar */
+start with program;
+
+program ::= 
+	 IMPORT:i MEGGY SEMI main_class:m
+	{:
+		RESULT = new Program(i.line, i.pos, m, new LinkedList<IClassDecl>());
+	:}
+    | COMMENT program:p 
+	{:
+		RESULT = p;
+	:}
+	;
+    
+main_class ::=
+    CLASS:c ID:name
+    LBRACE PUBLIC STATIC VOID MAIN 
+    LPAREN STRING LBRACKET RBRACKET ID:param RPAREN:l
+    statement_list:list 
+    RBRACE
+		{:
+			BlockStatement blockStatement = new BlockStatement(l.line, l.pos, list);
+			System.out.println("mainClass");
+			MainClass _mainClass_ = new MainClass(c.line, c.pos, name.lexeme, param.lexeme, blockStatement);
+			RESULT = _mainClass_; 
+		:}
+	| main_class:m COMMENT
+	{:RESULT = m;:}
+    ;
+
+statement_list ::=
+	statement_list:sl statement:s
+	{:
+		sl.add(s);
+		RESULT = sl;
+	:}
+	| /* Empty */
+	{:
+		RESULT = new LinkedList<IStatement>();
+	:}
+	;
+
+statement ::=
+	LBRACE:lb statement_list:list RBRACE
+	{:
+		//System.out.println("{statement_list}");
+		RESULT = new BlockStatement(lb.line, lb.pos, list);
+		//System.out.println("successfully set statement::= blockstatements "+ list.size());
+	:}
+	| MEGGYSETPIXEL:msp LPAREN 
+	exp:e1 COMMA 
+	exp:e2 COMMA 
+	exp:e3 
+	RPAREN SEMI
+	{:
+		//System.out.println("MSP");
+		RESULT = new MeggySetPixel(msp.line, msp.pos, e1, e2, e3);
+	:}
+	| MEGGYDELAY:m LPAREN exp:e RPAREN SEMI
+	{:
+		//System.out.println("Delay");
+		RESULT = new MeggyDelay(m.line, m.pos, e);
+	:}
+	| IF:i LPAREN exp:e RPAREN statement:s1
+	{:
+		//System.out.println("if");
+		IStatement s2 = new BlockStatement(s1.getLine(), s1.getPos()+1, new LinkedList<IStatement>());
+		RESULT = new IfStatement(i.line, i.pos, e, s1, s2);
+	:}
+	| IF:i LPAREN exp:e RPAREN statement:s1 ELSE statement:s2 
+	{:
+		//System.out.println("if/else");
+		RESULT = new IfStatement(i.line, i.pos, e, s1, s2);
+	:}
+	| WHILE:w LPAREN exp:e RPAREN statement:s 
+	{:	
+		//System.out.println("in while statement");
+		RESULT = new WhileStatement(w.line, w.pos, e, s);
+	:}
+	| COMMENT:c
+	{:	//System.out.println("comment");
+		//RESULT = new Comment(c.line, c.pos, c.lexeme, c.value);
+		RESULT = null;
+	:}
+	;
+
+exp ::=
+	exp:e1 AND:a exp:e2
+	{:
+		RESULT = new AndExp(a.line, a.pos, e1, e2);
+	:}
+	| exp:e1 EQUAL:eq exp:e2
+	{:
+		RESULT = new EqualExp(eq.line, eq.pos, e1, e2);
+	:}
+	| exp:e1 PLUS:p exp:e2
+	{:
+		RESULT = new PlusExp(p.line, p.pos, e1, e2);
+	:}
+	| exp:e1 MINUS:m exp:e2
+	{:
+		RESULT = new MinusExp(m.line, m.pos, e1, e2);
+	:}
+	| exp:e1 TIMES:t exp:e2
+	{:
+		RESULT = new MulExp(t.line, t.pos, e1, e2);
+	:}
+	| MINUS:m exp:e 
+	{:
+		RESULT = new NegExp(m.line, m.pos, e);
+	:}
+	| MEGGYGETPIXEL:m LPAREN exp:e1 COMMA exp:e2 RPAREN
+	{:
+		RESULT = new MeggyGetPixel(m.line, m.pos, e1, e2);
+	:}
+	| MEGGYCHECKBUTTON:m LPAREN exp:e RPAREN
+	{:
+		RESULT = new MeggyCheckButton(m.line, m.pos, e);
+	:}
+	| LPAREN BYTE RPAREN exp:e 
+	{:	
+		RESULT = new ByteCast(e.getLine(), e.getPos(), (IExp)e);
+	:}
+	| INT_LITERAL:i
+	{:
+		//System.out.println(i.value);
+		RESULT = new IntLiteral(i.line, i.pos, i.lexeme, i.value);
+	:}
+	| COLOR_LITERAL:c
+	{:
+		//System.out.println(c.lexeme);
+		RESULT = new ColorLiteral(c.line, c.pos, c.lexeme, c.value);
+	:}
+	| BUTTON_LITERAL:c
+	{:
+		//System.out.println(c.lexeme);
+		RESULT = new ButtonLiteral(c.line, c.pos, c.lexeme, c.value);
+	:}
+	| TRUE:t
+	{:
+		//System.out.println("true");
+		RESULT = new TrueLiteral(t.line, t.pos, t.lexeme, t.value);
+	:}
+	| FALSE:t
+	{:
+		//System.out.println("false");
+		RESULT = new FalseLiteral(t.line, t.pos, t.lexeme, t.value);
+	:}
+	| NOT:n exp:e
+	{:
+		RESULT = new NotExp(n.line, n.pos, e);
+	:}
+	| LPAREN:lp exp:e RPAREN
+	{:
+		RESULT = e;
+	:}
+	| COMMENT 
+	;
